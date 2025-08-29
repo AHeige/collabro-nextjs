@@ -15,8 +15,11 @@ model User {
   name          String?
   password      Password?
   refreshTokens RefreshToken[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  emailVerified Boolean        @default(false)
+
+  authProvider AuthProvider @default(CREDENTIALS)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   projectsOwned Project[]       @relation("OwnerProjects")
   projectMember ProjectMember[]
@@ -26,6 +29,8 @@ model User {
   timeEntries   TimeEntry[]
   auditLogs     AuditLog[]
   stakeholder   Stakeholder[]
+
+  EmailVerificationToken EmailVerificationToken[]
 }
 
 // -------------------- Passwords --------------------
@@ -45,6 +50,24 @@ model RefreshToken {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ------------------- Auth Providers ---------------------
+enum AuthProvider {
+  CREDENTIALS
+  GOOGLE
+  GITHUB
+  MICROSOFT
 }
 
 // -------------------- Roles & RBAC --------------------
