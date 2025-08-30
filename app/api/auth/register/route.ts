@@ -33,9 +33,9 @@ export async function POST(req: Request) {
     },
   })
 
-  // 2. Generate verification token and store hashed version
+  // 2. Generate verification token and store hashed SHA-256 version
   const rawToken = crypto.randomBytes(32).toString('hex')
-  const hashedToken = await bcrypt.hash(rawToken, 10)
+  const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex')
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
   await prisma.emailVerificationToken.create({

@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
@@ -14,12 +14,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Missing token' }, { status: 400 })
   }
 
-  // Fetch all tokens (since bcrypt hashes can't be queried directly)
-  const allTokens = await prisma.emailVerificationToken.findMany({
+  const hashed = crypto.createHash('sha256').update(token).digest('hex')
+  const record = await prisma.emailVerificationToken.findUnique({
+    where: { token: hashed },
     include: { user: true },
   })
-
-  const record = allTokens.find((r) => bcrypt.compareSync(token, r.token))
 
   if (!record || record.expiresAt < new Date()) {
     return NextResponse.json({ error: 'Invalid or expired token' }, { status: 400 })
