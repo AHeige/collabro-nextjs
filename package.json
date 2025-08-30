@@ -24,13 +24,13 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.1.12",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "prisma": "^6.15.0",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.1.12",
     "typescript": "^5"
   }
 }

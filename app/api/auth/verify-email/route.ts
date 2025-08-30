@@ -4,9 +4,10 @@ import { prisma } from '@/lib/prisma'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const JWT_SECRET = process.env.JWT_SECRET
 
 export async function GET(req: Request) {
+  if (!JWT_SECRET) return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 })
   const { searchParams } = new URL(req.url)
   const token = searchParams.get('token')
 

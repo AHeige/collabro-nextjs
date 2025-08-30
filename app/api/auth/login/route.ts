@@ -4,9 +4,11 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const JWT_SECRET = process.env.JWT_SECRET
 
 export async function POST(req: Request) {
+  if (!JWT_SECRET) return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 })
+
   const { email, password } = await req.json()
 
   const user = await prisma.user.findUnique({
