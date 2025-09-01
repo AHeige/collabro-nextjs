@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import jwt from 'jsonwebtoken'
-import { prisma } from '../prisma'
+import { prisma } from '@/lib/prisma'
 
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -10,21 +10,29 @@ export async function getAuthUser() {
 
   if (!token) return null
   if (!JWT_SECRET) {
-    console.error('Missing env variabl')
-    return
+    console.error('Missing env variable: JWT_SECRET')
+    return null
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string }
+
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       include: {
+        teamMember: {
+          include: {
+            team: true, // ✅ teamets namn + id
+            role: {
+              include: { permissions: true }, // ✅ team-permissions
+            },
+          },
+        },
         projectMember: {
           include: {
+            project: true, // ✅ projektets namn + id
             role: {
-              include: {
-                permissions: true,
-              },
+              include: { permissions: true }, // ✅ projekt-permissions
             },
           },
         },
@@ -43,6 +51,10 @@ export function hasPermission(
   entity: string,
   action: 'canRead' | 'canCreate' | 'canUpdate' | 'canDelete'
 ): boolean {
-  const permissions = user?.projectMember.flatMap((pm) => pm.role?.permissions || [])
-  return permissions?.some((p) => p.entity === entity && p[action]) ?? false
+  if (!user) return false
+
+  const teamPermissions = user.teamMember.flatMap((tm) => tm.role?.permissions || [])
+  const projectPermissions = user.projectMember.flatMap((pm) => pm.role?.permissions || [])
+
+  return [...teamPermissions, ...projectPermissions].some((p) => p.entity === entity && p[action] === true)
 }

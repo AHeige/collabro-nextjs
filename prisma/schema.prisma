@@ -20,6 +20,7 @@ model User {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
+  // relations
   projectsOwned Project[]       @relation("OwnerProjects")
   projectMember ProjectMember[]
   teamMember    TeamMember[]
@@ -71,15 +72,20 @@ enum AuthProvider {
 
 // -------------------- Roles & RBAC --------------------
 model Role {
-  id             String           @id @default(uuid())
-  name           String
-  projectId      String? // null = global roll
-  permissions    RolePermission[]
-  projectMembers ProjectMember[]
-  teamMembers    TeamMember[]
-  invitations    Invitation[]
+  id              String           @id @default(uuid())
+  name            String
+  scope           RoleScope        @default(PROJECT) // <--- ny, säger om rollen gäller team eller project
+  permissions     RolePermission[]
+  projectMembers  ProjectMember[]
+  teamMembers     TeamMember[]
+  teamInvitations TeamInvitation[]
 
-  @@unique([name, projectId])
+  @@unique([name, scope])
+}
+
+enum RoleScope {
+  TEAM
+  PROJECT
 }
 
 model RolePermission {
@@ -98,12 +104,13 @@ model RolePermission {
 
 // -------------------- Teams --------------------
 model Team {
-  id        String       @id @default(uuid())
-  name      String
-  users     TeamMember[]
-  projects  Project[]
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @default(now())
+  id             String           @id @default(uuid())
+  name           String
+  users          TeamMember[]
+  projects       Project[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now())
+  TeamInvitation TeamInvitation[]
 }
 
 model TeamMember {
@@ -126,29 +133,29 @@ model Project {
   description String?
   color       String  @default("#3B82F6")
   ownerId     String
-  teamId      String?
+  teamId      String
 
-  owner        User            @relation("OwnerProjects", fields: [ownerId], references: [id])
-  team         Team?           @relation(fields: [teamId], references: [id])
-  members      ProjectMember[]
-  milestones   Milestone[]
-  statuses     Status[]
-  categories   Category[]
-  tasks        Task[]
-  invitations  Invitation[]
-  attachments  Attachment[]
-  stakeholders Stakeholder[]
-  auditLogs    AuditLog[]
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @default(now())
+  owner           User             @relation("OwnerProjects", fields: [ownerId], references: [id])
+  team            Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  members         ProjectMember[]
+  milestones      Milestone[]
+  statuses        Status[]
+  categories      Category[]
+  tasks           Task[]
+  teamInvitations TeamInvitation[]
+  attachments     Attachment[]
+  stakeholders    Stakeholder[]
+  auditLogs       AuditLog[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 // -------------------- Project Members --------------------
 model ProjectMember {
-  id        String  @id @default(uuid())
+  id        String @id @default(uuid())
   projectId String
   userId    String
-  roleId    String?
+  roleId    String
 
   invitedBy String?
   joinedAt  DateTime?
@@ -156,7 +163,7 @@ model ProjectMember {
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role    Role?   @relation(fields: [roleId], references: [id])
+  role    Role    @relation(fields: [roleId], references: [id])
 
   @@unique([projectId, userId])
 }
@@ -269,10 +276,10 @@ enum Priority {
   HIGH
 }
 
-// -------------------- Invitations --------------------
-model Invitation {
+// -------------------- Team Invitations --------------------
+model TeamInvitation {
   id         String    @id @default(uuid())
-  projectId  String
+  teamId     String
   email      String
   roleId     String
   invitedBy  String
@@ -281,10 +288,10 @@ model Invitation {
   acceptedAt DateTime?
   createdAt  DateTime  @default(now())
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  role    Role    @relation(fields: [roleId], references: [id])
-
-  @@unique([projectId, email])
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id])
+  Project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
 }
 
 // -------------------- Time Entries --------------------
@@ -345,13 +352,41 @@ model Stakeholder {
 
 // -------------------- Audit Log --------------------
 model AuditLog {
-  id        String   @id @default(uuid())
-  projectId String?
-  userId    String?
-  action    String
-  meta      Json?
-  createdAt DateTime @default(now())
+  id         String      @id @default(uuid())
+  projectId  String?
+  userId     String?
+  action     AuditAction
+  targetType AuditTarget
+  targetId   String?
+  meta       Json?
+  createdAt  DateTime    @default(now())
 
   project Project? @relation(fields: [projectId], references: [id])
   user    User?    @relation(fields: [userId], references: [id])
+}
+
+enum AuditAction {
+  CREATED
+  UPDATED
+  DELETED
+  ASSIGNED
+  UNASSIGNED
+  STATUS_CHANGED
+  COMMENTED
+  FILE_UPLOADED
+  FILE_DELETED
+  INVITED
+  JOINED
+  LEFT
+  ROLE_CHANGED
+}
+
+enum AuditTarget {
+  TEAM
+  PROJECT
+  MILESTONE
+  TASK
+  COMMENT
+  ATTACHMENT
+  USER
 }
