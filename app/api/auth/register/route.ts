@@ -20,33 +20,54 @@ export async function POST(req: Request) {
 
   const hashedPassword = await bcrypt.hash(password, 10)
 
-  // token
+  // generate token
   const rawToken = crypto.randomBytes(32).toString('hex')
   const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex')
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1h
 
-  // transaction: create user + verification token
-  const [user] = await prisma.$transaction([
-    prisma.user.create({
+  // fetch TeamOwner role
+  const teamOwnerRole = await prisma.role.findFirst({
+    where: { name: 'TeamOwner', scope: 'TEAM' },
+  })
+  if (!teamOwnerRole) {
+    return NextResponse.json({ error: 'TeamOwner role not found' }, { status: 500 })
+  }
+
+  // transaction: user + verification token + default team
+  const [user] = await prisma.$transaction(async (tx) => {
+    const createdUser = await tx.user.create({
       data: {
         email: normalizedEmail,
         name: name || normalizedEmail.split('@')[0],
         emailVerified: false,
-        password: {
-          create: { hashedValue: hashedPassword },
-        },
+        password: { create: { hashedValue: hashedPassword } },
       },
-    }),
-    prisma.emailVerificationToken.create({
+    })
+
+    await tx.emailVerificationToken.create({
       data: {
         token: hashedToken,
-        user: { connect: { email: normalizedEmail } },
+        userId: createdUser.id,
         expiresAt,
       },
-    }),
-  ])
+    })
 
-  // mail
+    await tx.team.create({
+      data: {
+        name: `${createdUser.name || 'User'}'s Team`,
+        users: {
+          create: {
+            userId: createdUser.id,
+            roleId: teamOwnerRole.id,
+          },
+        },
+      },
+    })
+
+    return [createdUser]
+  })
+
+  // send mail
   const verifyUrl = `${process.env.APP_URL}/verify-email?token=${rawToken}`
 
   await mailjet.post('send', { version: 'v3.1' }).request({
@@ -57,6 +78,7 @@ export async function POST(req: Request) {
         Subject: 'Verify your email',
         HTMLPart: `
           <h3>Welcome, ${name || normalizedEmail.split('@')[0]}!</h3>
+          <p>Your default team has been created automatically.</p>
           <p>Please verify your email by clicking the link below:</p>
           <a href="${verifyUrl}">Verify Email</a>
           <p>This link will expire in 1 hour.</p>
@@ -66,6 +88,6 @@ export async function POST(req: Request) {
   })
 
   return NextResponse.json({
-    message: 'Registration successful. Please check your email to verify your account.',
+    message: 'Registration successful. A default team has been created for you. Please check your email to verify your account.',
   })
 }
