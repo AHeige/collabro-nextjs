@@ -31,6 +31,7 @@ model User {
   stakeholder   Stakeholder[]
 
   EmailVerificationToken EmailVerificationToken[]
+  TaskEstimate           TaskEstimate[]
 }
 
 // -------------------- Passwords --------------------
@@ -74,7 +75,7 @@ enum AuthProvider {
 model Role {
   id              String           @id @default(uuid())
   name            String
-  scope           RoleScope        @default(PROJECT) // <--- ny, säger om rollen gäller team eller project
+  scope           RoleScope        @default(PROJECT)
   permissions     RolePermission[]
   projectMembers  ProjectMember[]
   teamMembers     TeamMember[]
@@ -148,6 +149,34 @@ model Project {
   auditLogs       AuditLog[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+  ProjectExpense  ProjectExpense[]
+  ProjectBudget   ProjectBudget[]
+}
+
+// ------------------ Project Expenses/Budget ----------------
+model ProjectExpense {
+  id          String   @id @default(uuid())
+  projectId   String
+  description String
+  amount      Float
+  category    String? // ex. "Licens", "Resa", "Konsult"
+  incurredAt  DateTime // när kostnaden uppstod
+  createdAt   DateTime @default(now())
+  milestoneId String?
+
+  milestone Milestone? @relation(fields: [milestoneId], references: [id])
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectBudget {
+  id          String   @id @default(uuid())
+  projectId   String
+  periodStart DateTime
+  periodEnd   DateTime
+  budgeted    Float // budget för perioden
+  createdAt   DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 // -------------------- Project Members --------------------
@@ -170,16 +199,26 @@ model ProjectMember {
 
 // -------------------- Milestones --------------------
 model Milestone {
-  id        String    @id @default(uuid())
+  id        String        @id @default(uuid())
   projectId String
   name      String
+  type      MilestoneType @default(EVENT)
   startDate DateTime?
   endDate   DateTime?
   tasks     Task[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @default(now())
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project        Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ProjectExpense ProjectExpense[]
+}
+
+enum MilestoneType {
+  EVENT // en händelse, ex. "Grand Opening"
+  RELEASE // release/version, ex. "v5.1"
+  SPRINT // iteration i agilt arbete
+  PHASE // fas i vattenfall, ex. "Design phase"
+  DELIVERABLE // leverans/avrapportering till styrgrupp
 }
 
 // -------------------- Statuses --------------------
@@ -230,6 +269,13 @@ model Task {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  // 🔑 Hierarki
+  taskType     TaskType @default(TASK)
+  parentTaskId String?
+  parentTask   Task?    @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
+  subtasks     Task[]   @relation("TaskHierarchy")
+
+  // Relations
   project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   milestone    Milestone?       @relation(fields: [milestoneId], references: [id])
   status       Status           @relation(fields: [statusId], references: [id])
@@ -242,6 +288,26 @@ model Task {
   attachment   Attachment[]
   linkedTasks  TaskLink[]       @relation("task_links")
   linkedFrom   TaskLink[]       @relation("linked_to")
+  estimates    TaskEstimate[]
+}
+
+enum TaskType {
+  EPIC
+  TASK
+  SUBTASK
+}
+
+model TaskEstimate {
+  id         String   @id @default(uuid())
+  taskId     String
+  userId     String?
+  hours      Int
+  hourlyRate Float?
+  cost       Float?
+  createdAt  DateTime @default(now())
+
+  task Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id])
 }
 
 // -------------------- Task Links --------------------
