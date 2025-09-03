@@ -12,11 +12,10 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
   const filter = table.getState().globalFilter as string
 
   return (
-    <div className='space-y-4'>
-      <Input placeholder='Filter tasks...' value={filter ?? ''} onChange={(e) => table.setGlobalFilter(e.target.value)} className='max-w-sm' />
-
-      <div className='overflow-hidden rounded-md border'>
-        <Table>
+    <div className='py-1 space-y-4'>
+      {/* 📋 Table with horizontal scroll */}
+      <div className='overflow-x-auto rounded-md border'>
+        <Table className='min-w-[900px]'>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -27,8 +26,6 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
             ))}
           </TableHeader>
           <TableBody>
-            {/* Quick Add Row */}
-
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
@@ -44,6 +41,23 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
                 </TableCell>
               </TableRow>
             )}
+
+            {/* 👻 Ghost row */}
+            <TableRow className='bg-muted/20'>
+              <TableCell />
+              <TableCell colSpan={table.getAllColumns().length - 1}>
+                <Input
+                  placeholder='Add a new task...'
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                      const title = e.currentTarget.value.trim()
+                      e.currentTarget.value = ''
+                      table.options.meta?.addRow?.({ title })
+                    }
+                  }}
+                />
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </div>

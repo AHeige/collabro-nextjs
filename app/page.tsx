@@ -74,7 +74,7 @@ const Landing = () => {
       {/* Hero Section */}
       <section className='container py-16 md:py-24'>
         <div className='text-center'>
-          <Badge variant='secondary' className='mb-4'>
+          <Badge variant='success' className='mb-4'>
             <Shield className='mr-1 h-3 w-3' />
             GDPR Compliant & Secure
           </Badge>

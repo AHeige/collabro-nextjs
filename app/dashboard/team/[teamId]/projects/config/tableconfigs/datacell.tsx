@@ -18,7 +18,7 @@ export function DateCell<TData>({ getValue, row, column, table }: CellContext<TD
           {date ? format(date, 'yyyy-MM-dd') : 'Pick a date'}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-auto p-0 bg-popover' align='start'>
+      <PopoverContent className='w-auto p-0 bg-background' align='start'>
         <Calendar
           mode='single'
           selected={date}

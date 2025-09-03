@@ -10,6 +10,7 @@ import { DateCell } from './datacell'
 import { EditableCell } from './editablecell'
 import { SortableHeader } from './sortableheader'
 import { StatusCell } from './statuscell'
+import { TitleHeader } from './titleheader'
 
 export const columnconfig: ColumnDef<Partial<Task>>[] = [
   {
@@ -23,8 +24,8 @@ export const columnconfig: ColumnDef<Partial<Task>>[] = [
   },
   {
     accessorKey: 'title',
-    header: ({ column }) => <SortableHeader column={column} label='Title' />,
-    cell: EditableCell,
+    header: ({ column }) => <TitleHeader column={column} />,
+    cell: ({ getValue }) => <span>{getValue() as string}</span>,
   },
   {
     accessorKey: 'statusId',
