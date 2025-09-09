@@ -4,11 +4,12 @@ import { hasPermission } from '@/lib/auth'
 import { getAuthUser } from '@/lib/auth-server'
 
 interface Params {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 // -------------------- POST /api/teams/:id/members --------------------
 export async function POST(req: Request, { params }: Params) {
+  const { id } = await params
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -31,7 +32,7 @@ export async function POST(req: Request, { params }: Params) {
 
   const member = await prisma.teamMember.create({
     data: {
-      teamId: params.id,
+      teamId: id,
       userId,
       roleId: role.id,
     },
@@ -45,7 +46,7 @@ export async function POST(req: Request, { params }: Params) {
 }
 
 // -------------------- DELETE /api/teams/:id/members?userId=xxx --------------------
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -53,7 +54,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const { id } = params
+  const { id } = await params
   const searchParams = req.nextUrl.searchParams
   const userId = searchParams.get('userId')
 

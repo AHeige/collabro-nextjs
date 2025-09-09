@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { hasPermission } from '@/lib/auth'
 import { getAuthUser } from '@/lib/auth-server'
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -11,9 +11,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  const { id } = await params
+
   const project = await prisma.project.findFirst({
     where: {
-      id: params.id,
+      id: id,
       members: { some: { userId: user.id } },
     },
     include: { members: true },
@@ -26,7 +28,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   return NextResponse.json(project)
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -36,8 +38,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   const data = await req.json()
 
+  const { id } = await params
+
   const project = await prisma.project.update({
-    where: { id: params.id },
+    where: { id: id },
     data: {
       name: data.name,
       description: data.description,
@@ -47,15 +51,17 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   return NextResponse.json(project)
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { id } = await params
 
   if (!hasPermission(user, 'Project', 'canDelete')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  await prisma.project.delete({ where: { id: params.id } })
+  await prisma.project.delete({ where: { id: id } })
 
   return NextResponse.json({ success: true })
 }
