@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Plus, ChevronRight, Users, FolderKanban, Activity, TrendingUp, Clock, RefreshCcw } from 'lucide-react'
+import { toast } from 'sonner'
 
 /**
  * Collabro — Team Dashboard page
@@ -319,13 +320,27 @@ export default function TeamDashboardPage() {
           {team.projects && team.projects.length > 0 ? (
             <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
               {team.projects.map((p) => (
-                <ProjectCard key={p.id} project={p} onOpen={() => router.push(`/projects/${p.id}`)} />
+                <ProjectCard key={p.id} project={p} onOpen={() => router.push(`${team.id}/projects/${p.id}`)} />
               ))}
               {/* Create card CTA */}
               <Card
                 className='border-dashed hover:border-primary/60 hover:shadow-sm'
                 role='button'
-                onClick={() => router.push(`/projects/new?teamId=${team.id}`)}
+                onClick={async () => {
+                  const randomName = `Project ${Math.floor(Math.random() * 100)}`
+                  try {
+                    await fetch(`/api/projects/`, {
+                      method: 'POST',
+                      body: JSON.stringify({ teamId: team.id, name: randomName, description: 'Just a new project' }),
+                    })
+                    toast.success('New team created', {
+                      description: `A new team just got created with then name ${randomName}`,
+                    })
+                  } catch (e) {
+                    toast.error('Could not create a project')
+                    console.error(e)
+                  }
+                }}
               >
                 <CardHeader>
                   <CardTitle className='flex items-center justify-between text-base'>

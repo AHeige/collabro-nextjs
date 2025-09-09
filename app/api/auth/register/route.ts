@@ -44,6 +44,10 @@ export async function POST(req: Request) {
       },
     })
 
+    if (!createdUser) {
+      throw new Error('Error on creating user')
+    }
+
     await tx.emailVerificationToken.create({
       data: {
         token: hashedToken,
@@ -59,6 +63,12 @@ export async function POST(req: Request) {
           create: {
             userId: createdUser.id,
             roleId: teamOwnerRole.id,
+          },
+        },
+        projects: {
+          create: {
+            name: `${createdUser.name || 'User'}'s Project`,
+            ownerId: createdUser.id,
           },
         },
       },

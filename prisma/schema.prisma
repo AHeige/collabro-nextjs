@@ -45,7 +45,7 @@ model Password {
 // -------------------- Refresh Tokens --------------------
 model RefreshToken {
   id          String   @id @default(uuid())
-  hashedToken String
+  hashedToken String   @unique
   revoked     Boolean  @default(false)
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -87,6 +87,14 @@ model Role {
 enum RoleScope {
   TEAM
   PROJECT
+}
+
+enum Entity {
+  Team
+  Project
+  Task
+  Milestone
+  Comment
 }
 
 model RolePermission {

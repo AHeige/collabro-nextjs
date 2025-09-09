@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { signAccessJwt } from '@/lib/jwt'
 
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Please verify your email before logging in.' }, { status: 403 })
   }
 
-  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' })
+  const token = signAccessJwt(user.id)
 
   const teams = user.teamMember.map((tm) => ({
     id: tm.team.id,

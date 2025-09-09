@@ -7,7 +7,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  if (!hasPermission(user, 'project', 'canRead')) {
+  if (!hasPermission(user, 'Project', 'canRead')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -30,7 +30,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  if (!hasPermission(user, 'project', 'canUpdate')) {
+  if (!hasPermission(user, 'Project', 'canUpdate')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -51,7 +51,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  if (!hasPermission(user, 'project', 'canDelete')) {
+  if (!hasPermission(user, 'Project', 'canDelete')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

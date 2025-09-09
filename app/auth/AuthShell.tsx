@@ -10,6 +10,7 @@ import { Loader } from 'lucide-react'
 import Spinner from '@/components/ui/spinner'
 import { toast } from 'sonner'
 import Registered from './registered/page'
+import { refreshMe } from '@/components/headers/SmartHeader'
 
 export default function AuthShell() {
   const [loading, setLoading] = useState<boolean>(false)
@@ -38,6 +39,7 @@ export default function AuthShell() {
       if (data.teams.length === 0) window.location.href = '/onboarding'
       else if (data.teams.length === 1) window.location.href = `/${data.teams[0].id}`
       else window.location.href = '/select-team'
+      refreshMe()
     } catch (err) {
       setLoading(false)
       console.error('Login error:', err)
@@ -81,6 +83,7 @@ export default function AuthShell() {
 
       toast.success('Account created! Please verify your account through email.')
       setRegistered({ name: name, email: email })
+      refreshMe()
       // window.location.href = '/'
     } catch (err) {
       setLoading(false)

@@ -6,6 +6,7 @@ import { LoggedInHeader } from '@/components/headers/LoggedInHeader'
 import { LoggedOutHeader } from '@/components/headers/LoggedOutHeader'
 import { getAuthUserLite } from '@/lib/auth-server'
 import { HeaderUser } from '@/types/auth'
+import SmartHeader from '@/components/headers/SmartHeader'
 
 export const metadata: Metadata = {
   title: 'Collabro',
@@ -19,12 +20,11 @@ const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin']
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const u = await getAuthUserLite()
-  const headerUser: HeaderUser | null = u ? { id: u.id, name: u.name, email: u.email } : null
 
   return (
     <html lang='en'>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>
-        {headerUser ? <LoggedInHeader user={headerUser} /> : <LoggedOutHeader />}
+        <SmartHeader initialUser={u ? { id: u.id, name: u.name, email: u.email } : null} />
         {children}
         <Toaster richColors />
       </body>

@@ -10,6 +10,7 @@ interface DataTableProps<TData> {
 
 export function DataTable<TData>({ table }: DataTableProps<TData>) {
   const filter = table.getState().globalFilter as string
+  const visible = table.getVisibleLeafColumns().length
 
   return (
     <div className='py-1 space-y-4'>
@@ -45,7 +46,7 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
             {/* 👻 Ghost row */}
             <TableRow className='bg-muted/20'>
               <TableCell />
-              <TableCell colSpan={table.getAllColumns().length - 1}>
+              <TableCell colSpan={Math.max(visible - 1, 1)}>
                 <Input
                   placeholder='Add a new task...'
                   onKeyDown={(e) => {

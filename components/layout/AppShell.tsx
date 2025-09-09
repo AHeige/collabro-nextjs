@@ -28,11 +28,11 @@ export default function AppShell({ teamId, teamName, children }: AppShellProps) 
   const base = `/${teamId}`
 
   const items = [
-    { title: 'Översikt', url: `${base}/dashboard`, icon: Home },
-    { title: 'Mina team', url: `/select-team`, icon: Users }, // global sida
-    { title: 'Projekt', url: `${base}/projects`, icon: Folder },
-    { title: 'Kalender', url: `${base}/calendar`, icon: Calendar },
-    { title: 'Inställningar', url: `${base}/settings`, icon: Settings },
+    { title: 'Översikt', url: `${base}/`, icon: Home },
+    // { title: 'Mina team', url: `/select-team`, icon: Users }, // global sida
+    // { title: 'Projekt', url: `${base}/projects`, icon: Folder },
+    // { title: 'Kalender', url: `${base}/calendar`, icon: Calendar },
+    // { title: 'Inställningar', url: `${base}/settings`, icon: Settings },
   ]
 
   return (
