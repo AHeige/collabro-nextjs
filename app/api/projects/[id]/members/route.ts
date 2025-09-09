@@ -4,7 +4,7 @@ import { hasPermission } from '@/lib/auth'
 import { getAuthUser } from '@/lib/auth-server'
 
 // -------------------- POST /api/projects/:id/members --------------------
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const { id } = params
+  const { id } = await params
   const { userId, roleName } = await req.json()
 
   if (!userId || !roleName) {
