@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getAuthUser, hasPermission } from '@/lib/auth'
+import { hasPermission } from '@/lib/auth'
+import { getAuthUser } from '@/lib/auth-server'
 
 // -------------------- GET /api/teams --------------------
 export async function GET() {

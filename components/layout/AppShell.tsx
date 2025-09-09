@@ -38,7 +38,7 @@ export default function AppShell({ teamId, teamName, children }: AppShellProps) 
   return (
     <div className='min-h-screen'>
       <SidebarProvider>
-        <Sidebar>
+        <Sidebar style={{ top: '65px' }}>
           <SidebarHeader>
             <SidebarGroupLabel>{teamName ?? 'Collabro'}</SidebarGroupLabel>
           </SidebarHeader>

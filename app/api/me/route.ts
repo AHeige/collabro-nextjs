@@ -1,12 +1,7 @@
+// app/api/me/route.ts
 import { NextResponse } from 'next/server'
-import { getAuthUser } from '@/lib/auth'
-
+import { getAuthUserLite } from '@/lib/auth-server'
 export async function GET() {
-  const user = await getAuthUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  return NextResponse.json(user)
+  const user = await getAuthUserLite()
+  return NextResponse.json({ user }, { status: 200, headers: { 'Cache-Control': 'no-store' } })
 }

@@ -2,12 +2,12 @@
 import { redirect, notFound } from 'next/navigation'
 import AppShell from '@/components/layout/AppShell'
 import { prisma } from '@/lib/prisma'
-import { getAuthUser } from '@/lib/auth'
+import { getAuthUserLite } from '@/lib/auth-server'
 
 export default async function TeamLayout({ children, params }: { children: React.ReactNode; params: Promise<{ teamId: string }> }) {
   const { teamId } = await params
 
-  const session = await getAuthUser()
+  const session = await getAuthUserLite()
   if (!session) redirect('/auth')
 
   const team = await prisma.team.findUnique({

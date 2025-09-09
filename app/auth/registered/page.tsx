@@ -57,7 +57,8 @@ export default function Registered({ name, email }: Props) {
             <div className='absolute inset-0 rounded-full blur-md bg-gradient-to-tr from-primary/30 to-primary/10' />
             <CheckCircle2 className='relative h-12 w-12 text-primary' />
           </div>
-          <h1 className='text-xl font-semibold tracking-tight'>Konto skapat – välkommen, {name}!</h1>
+          <h1 className='text-xl font-semibold tracking-tight'>Välkommen {name}</h1>
+          <h2 className='text-xl font-semibold tracking-tight'>Kontot har skapats!</h2>
           <p className='text-sm text-muted-foreground text-center'>Vi har skickat ett verifikationsmail. Bekräfta din e-post för att börja använda Collabro.</p>
         </div>
 

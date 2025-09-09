@@ -57,19 +57,6 @@ const Landing = () => {
   return (
     <div className='min-h-screen bg-gradient-to-br from-primary-subtle via-background to-accent-subtle'>
       {/* Header */}
-      <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-        <div className='container flex h-16 items-center justify-between'>
-          <h1 className='text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent'>{brand.name}</h1>
-          <div className='flex items-center gap-3'>
-            <Button asChild variant='ghost'>
-              <Link href='/auth'>Sign In</Link>
-            </Button>
-            <Button asChild>
-              <Link href='/auth?tab=signup'>Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
 
       {/* Hero Section */}
       <section className='container py-16 md:py-24'>

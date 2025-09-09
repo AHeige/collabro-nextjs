@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getAuthUser, hasPermission } from '@/lib/auth'
+import { hasPermission } from '@/lib/auth'
+import { getAuthUser } from '@/lib/auth-server'
 
 // -------------------- POST /api/projects/:id/members --------------------
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {

@@ -4,7 +4,8 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getAuthUser, hasPermission } from '@/lib/auth'
+import { hasPermission } from '@/lib/auth'
+import { getAuthUser } from '@/lib/auth-server'
 
 export async function GET(_req: Request, context: { params: Promise<{ teamId: string }> }) {
   const { teamId } = await context.params
