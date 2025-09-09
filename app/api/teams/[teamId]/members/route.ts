@@ -3,12 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { hasPermission } from '@/lib/auth'
 import { getAuthUser } from '@/lib/auth-server'
 
-interface Params {
-  params: Promise<{ id: string }>
-}
-
 // -------------------- POST /api/teams/:id/members --------------------
-export async function POST(req: Request, { params }: Params) {
+export async function POST(req: Request, params: Promise<{ id: string }>) {
   const { id } = await params
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -46,7 +42,7 @@ export async function POST(req: Request, { params }: Params) {
 }
 
 // -------------------- DELETE /api/teams/:id/members?userId=xxx --------------------
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, params: Promise<{ id: string }>) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
