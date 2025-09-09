@@ -1,13 +1,14 @@
+// app/api/teams/[teamId]/route.ts
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthUser, hasPermission } from '@/lib/auth'
 
-interface Params {
-  params: { id: string }
-}
+export async function GET(_req: Request, context: { params: Promise<{ teamId: string }> }) {
+  const { teamId } = await context.params
 
-// -------------------- GET /api/teams/:id --------------------
-export async function GET(req: Request, { params }: Params) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -15,8 +16,12 @@ export async function GET(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  if (!teamId) {
+    return NextResponse.json({ error: 'Missing teamId' }, { status: 400 })
+  }
+
   const team = await prisma.team.findUnique({
-    where: { id: params.id },
+    where: { id: teamId },
     include: {
       users: {
         include: {
@@ -37,11 +42,14 @@ export async function GET(req: Request, { params }: Params) {
     },
   })
 
-  // Extra säkerhet: kolla att user faktiskt är medlem i teamet
-  const isMember = team?.users.some((tm) => tm.userId === user.id)
+  if (!team) {
+    return NextResponse.json({ error: 'Team not found' }, { status: 404 })
+  }
+
+  const isMember = team.users.some((tm) => tm.userId === user.id)
   if (!isMember) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  return NextResponse.json(team)
+  return NextResponse.json(team, { status: 200 })
 }

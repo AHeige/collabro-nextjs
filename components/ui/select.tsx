@@ -28,6 +28,7 @@ function SelectTrigger({
 }) {
   return (
     <SelectPrimitive.Trigger
+      style={{ cursor: 'pointer' }}
       data-slot='select-trigger'
       data-size={size}
       className={cn(
@@ -77,6 +78,7 @@ function SelectLabel({ className, ...props }: React.ComponentProps<typeof Select
 function SelectItem({ className, children, ...props }: React.ComponentProps<typeof SelectPrimitive.Item>) {
   return (
     <SelectPrimitive.Item
+      style={{ cursor: 'pointer' }}
       data-slot='select-item'
       className={cn(
         // Base

@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Card } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default function VerifyEmailPage() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
@@ -17,15 +21,16 @@ export default function VerifyEmailPage() {
       return
     }
 
-    const verifyEmail = async () => {
+    ;(async () => {
       try {
         const res = await fetch(`/api/auth/verify-email?token=${token}`)
-        const data = await res.json()
+        const data = await res.json().catch(() => ({}))
 
         if (res.ok) {
           setStatus('success')
-          setMessage('Email verified successfully! Redirecting to login...')
-          setTimeout(() => router.push('/login'), 3000)
+          setMessage('Email verified! Redirecting…')
+          const target = data?.redirectPath || '/auth'
+          setTimeout(() => router.replace(target), 2000)
         } else {
           setStatus('error')
           setMessage(data.error || 'Verification failed')
@@ -34,15 +39,39 @@ export default function VerifyEmailPage() {
         setStatus('error')
         setMessage('Something went wrong')
       }
-    }
-
-    verifyEmail()
+    })()
   }, [token, router])
 
+  const renderIcon = () => {
+    if (status === 'loading') return <Loader2 className='h-12 w-12 animate-spin text-primary' />
+    if (status === 'success') return <CheckCircle2 className='h-12 w-12 text-green-500' />
+    return <XCircle className='h-12 w-12 text-destructive' />
+  }
+
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      {status === 'loading' && <p>Verifying your email...</p>}
-      {status !== 'loading' && <p>{message}</p>}
+    <div className='flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/40 px-4'>
+      <Card className='w-full max-w-md overflow-hidden border-border/60 shadow-lg'>
+        <div className='flex flex-col items-center gap-4 px-6 pb-6 pt-10 text-center'>
+          {renderIcon()}
+          <h1 className='text-xl font-semibold tracking-tight'>
+            {status === 'loading' && 'Verifying your email…'}
+            {status === 'success' && 'Email verified 🎉'}
+            {status === 'error' && 'Verification failed'}
+          </h1>
+          <p className='text-sm text-muted-foreground'>{message}</p>
+        </div>
+
+        <Separator />
+
+        <div className='px-6 py-5'>
+          {status === 'error' && (
+            <Button onClick={() => router.push('/auth')} className='w-full'>
+              Back to login
+            </Button>
+          )}
+          {status === 'success' && <p className='text-xs text-muted-foreground'>You will be redirected automatically. Sit tight ✨</p>}
+        </div>
+      </Card>
     </div>
   )
 }

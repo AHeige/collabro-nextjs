@@ -1,5 +1,8 @@
-import { Calendar, Folder, Home, Inbox, Search, Settings, Users } from 'lucide-react'
+// components/layout/AppShell.tsx
+'use client'
 
+import { Calendar, Folder, Home, Settings, Users } from 'lucide-react'
+import Link from 'next/link'
 import {
   Sidebar,
   SidebarContent,
@@ -14,28 +17,33 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import Link from 'next/link'
 
-const items = [
-  { title: 'Översikt', url: '/dashboard', icon: Home },
-  { title: 'Mina team', url: '/dashboard/teams', icon: Users },
-  { title: 'Projekt', url: '/dashboard/teams/projects?projectId=1', icon: Folder },
-  { title: 'Kalender', url: '/dashboard/calendar', icon: Calendar },
-  { title: 'Inställningar', url: '/dashboard/settings', icon: Settings },
-]
-
-export default function Layout({
-  children,
-}: Readonly<{
+type AppShellProps = {
+  teamId: string
+  teamName?: string
   children: React.ReactNode
-}>) {
+}
+
+export default function AppShell({ teamId, teamName, children }: AppShellProps) {
+  const base = `/${teamId}`
+
+  const items = [
+    { title: 'Översikt', url: `${base}/dashboard`, icon: Home },
+    { title: 'Mina team', url: `/select-team`, icon: Users }, // global sida
+    { title: 'Projekt', url: `${base}/projects`, icon: Folder },
+    { title: 'Kalender', url: `${base}/calendar`, icon: Calendar },
+    { title: 'Inställningar', url: `${base}/settings`, icon: Settings },
+  ]
+
   return (
-    <div>
+    <div className='min-h-screen'>
       <SidebarProvider>
         <Sidebar>
+          <SidebarHeader>
+            <SidebarGroupLabel>{teamName ?? 'Collabro'}</SidebarGroupLabel>
+          </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Collabro</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {items.map((item) => (
@@ -52,8 +60,10 @@ export default function Layout({
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
+          <SidebarFooter />
         </Sidebar>
-        <main>
+
+        <main className='p-4'>
           <SidebarTrigger />
           {children}
         </main>

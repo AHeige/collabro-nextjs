@@ -4,6 +4,7 @@ import './globals.css'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { brand } from '@/config/brand'
+import { Toaster } from '@/components/ui/sonner'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -27,7 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>
+        {children}
+        <Toaster richColors />
+      </body>
     </html>
   )
 }

@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
   const user = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
-    include: { password: true },
+    include: { password: true, teamMember: { include: { team: true } } },
   })
 
   if (!user || !user.password) {
@@ -32,7 +32,12 @@ export async function POST(req: Request) {
 
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' })
 
-  const response = NextResponse.json({ message: 'Login successful' })
+  const teams = user.teamMember.map((tm) => ({
+    id: tm.team.id,
+    name: tm.team.name,
+  }))
+
+  const response = NextResponse.json({ message: 'Login successful', teams })
   response.cookies.set('auth_token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
