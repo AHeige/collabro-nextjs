@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { hasPermission } from '@/lib/auth'
 import { getAuthUserLite } from '@/lib/auth-server'
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUserLite()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
