@@ -1,4 +1,4 @@
 'use client'
 export default function TaskPage() {
-  return <div></div>
+  return <div>Single task page</div>
 }
