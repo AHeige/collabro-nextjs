@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { hasPermission } from '@/lib/auth'
 import { getAuthUser } from '@/lib/auth-server'
 
-export async function GET(_req: Request, params: Promise<{ teamId: string }>) {
+export async function GET(_req: Request, { params }: { params: Promise<{ teamId: string }> }) {
   const { teamId } = await params
 
   const user = await getAuthUser()
