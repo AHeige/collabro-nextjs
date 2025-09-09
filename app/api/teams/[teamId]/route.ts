@@ -7,8 +7,8 @@ import { prisma } from '@/lib/prisma'
 import { hasPermission } from '@/lib/auth'
 import { getAuthUser } from '@/lib/auth-server'
 
-export async function GET(_req: Request, context: { params: Promise<{ teamId: string }> }) {
-  const { teamId } = await context.params
+export async function GET(_req: Request, params: Promise<{ teamId: string }>) {
+  const { teamId } = await params
 
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
