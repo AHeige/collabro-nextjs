@@ -16,7 +16,8 @@
     "plugins": [
       {
         "name": "next"
-      }
+      },
+      { "name": "@typescript-eslint/eslint-plugin" }
     ],
     "paths": {
       "@/*": ["./*"]
