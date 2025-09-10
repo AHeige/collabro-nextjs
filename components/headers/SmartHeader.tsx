@@ -3,7 +3,7 @@
 import useSWR, { mutate } from 'swr'
 import { LoggedInHeader } from '@/components/headers/LoggedInHeader'
 import { LoggedOutHeader } from '@/components/headers/LoggedOutHeader'
-import type { HeaderUser } from '@/types/auth'
+import { HeaderUser } from '@/types/auth'
 
 const fetcher = async (url: string) => {
   const r = await fetch(url, { credentials: 'include', cache: 'no-store' })

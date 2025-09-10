@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import type { Team, Project } from '@prisma/client'
+import { Team, Project } from '@prisma/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -223,10 +223,7 @@ export default function TeamDashboardPage() {
         if (!mounted) return
         setTeam(json)
       } catch (e: unknown) {
-        console.warn(
-          'Using mocked team due to fetch error:',
-          e instanceof Error ? e.message : String(e)
-        )
+        console.warn('Using mocked team due to fetch error:', e instanceof Error ? e.message : String(e))
         if (!mounted) return
         // — Fallback to mock so you can iterate on UI immediately
         setTeam(mockTeam)

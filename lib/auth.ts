@@ -1,6 +1,6 @@
 // lib/auth.ts (klient-säker – inga server imports här)
-import type { UserLite } from '@/types/auth'
-import type { Entity } from '@prisma/client'
+import { UserLite } from '@/types/auth'
+import { Entity } from '@prisma/client'
 
 export function hasPermission(
   user: Pick<UserLite, 'teamMember' | 'projectMember'> | null | undefined,
