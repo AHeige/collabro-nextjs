@@ -60,9 +60,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params
   if (!id) return NextResponse.json({ error: 'Missing project id' }, { status: 400 })
 
-  let body: any
+  interface TaskPayload {
+    title?: string
+    statusId?: string
+    startDate?: string
+    endDate?: string
+  }
+
+  let body: TaskPayload
   try {
-    body = await req.json()
+    body = (await req.json()) as TaskPayload
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }

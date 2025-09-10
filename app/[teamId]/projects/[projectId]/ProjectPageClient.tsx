@@ -67,7 +67,7 @@ export default function ProjectPageClient({ initialTasks, team, project }: { ini
       addRow: async ({ title }: { title: string }) => {
         // Optimistisk add
         const tempId = `tmp_${crypto.randomUUID()}`
-        const optimistic: Partial<Task> = { id: tempId, title, statusId: 'Todo' as any, startDate: null, endDate: null, projectId: project.id }
+        const optimistic: Partial<Task> = { id: tempId, title, statusId: 'Todo', startDate: null, endDate: null, projectId: project.id }
         setData((old) => [...old, optimistic])
 
         try {

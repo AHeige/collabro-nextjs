@@ -3,6 +3,7 @@
 import useSWR, { mutate } from 'swr'
 import { LoggedInHeader } from '@/components/headers/LoggedInHeader'
 import { LoggedOutHeader } from '@/components/headers/LoggedOutHeader'
+import type { HeaderUser } from '@/types/auth'
 
 const fetcher = async (url: string) => {
   const r = await fetch(url, { credentials: 'include', cache: 'no-store' })
@@ -18,7 +19,7 @@ const fetcher = async (url: string) => {
   return r.json()
 }
 
-export default function SmartHeader({ initialUser }: { initialUser: any }) {
+export default function SmartHeader({ initialUser }: { initialUser: HeaderUser | null }) {
   const { data } = useSWR('/api/me', fetcher, { fallbackData: { user: initialUser } })
   const u = data?.user
   return u ? <LoggedInHeader user={u} /> : <LoggedOutHeader />

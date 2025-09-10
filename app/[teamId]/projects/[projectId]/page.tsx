@@ -9,7 +9,7 @@ export default async function Page({ params }: { params: Promise<{ teamId: strin
   const user = await getAuthUserLite()
   if (!user) notFound() // eller redirect('/auth')
 
-  const { teamId, projectId } = await params
+  const { projectId } = await params
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },

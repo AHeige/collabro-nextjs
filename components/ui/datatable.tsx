@@ -9,7 +9,6 @@ interface DataTableProps<TData> {
 }
 
 export function DataTable<TData>({ table }: DataTableProps<TData>) {
-  const filter = table.getState().globalFilter as string
   const visible = table.getVisibleLeafColumns().length
 
   return (

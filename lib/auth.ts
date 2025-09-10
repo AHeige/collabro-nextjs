@@ -10,5 +10,5 @@ export function hasPermission(
   if (!user) return false
   const teamPerms = (user.teamMember ?? []).flatMap((tm) => tm.role?.permissions ?? [])
   const projPerms = (user.projectMember ?? []).flatMap((pm) => pm.role?.permissions ?? [])
-  return [...teamPerms, ...projPerms].some((p) => p.entity === entity && (p as any)[action] === true)
+  return [...teamPerms, ...projPerms].some((p) => p.entity === entity && p[action] === true)
 }

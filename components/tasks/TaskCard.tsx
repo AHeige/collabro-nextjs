@@ -45,11 +45,11 @@ const TaskKanban = ({ task }: { task: Partial<Task> }) => (
 )
 
 /* --- Gantt View --- */
-const TaskGantt = ({ task }: { task: Partial<Task> }) => {
+const TaskGantt = ({ task }: { task: Partial<Task> & { x?: number; y?: number; width?: number } }) => {
   // default values om vi inte har koordinater än
-  const x = (task as any).x ?? 0
-  const y = (task as any).y ?? 0
-  const width = (task as any).width ?? 100
+  const x = task.x ?? 0
+  const y = task.y ?? 0
+  const width = task.width ?? 100
 
   return (
     <g role='group' aria-label={`Task: ${task.title}, from ${task.startDate} to ${task.endDate}`} tabIndex={0}>

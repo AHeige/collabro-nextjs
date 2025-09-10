@@ -2,10 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
-import { LoggedInHeader } from '@/components/headers/LoggedInHeader'
-import { LoggedOutHeader } from '@/components/headers/LoggedOutHeader'
 import { getAuthUserLite } from '@/lib/auth-server'
-import { HeaderUser } from '@/types/auth'
 import SmartHeader from '@/components/headers/SmartHeader'
 
 export const metadata: Metadata = {
