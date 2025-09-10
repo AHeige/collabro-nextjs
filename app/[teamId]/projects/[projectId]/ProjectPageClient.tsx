@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
-import { Task } from '@prisma/client'
+import type { Task } from '@prisma/client'
 import {
   ColumnFiltersState,
   SortingState,

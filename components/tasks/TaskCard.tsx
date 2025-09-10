@@ -1,4 +1,4 @@
-import { Task } from '@prisma/client'
+import type { Task } from '@prisma/client'
 
 interface TaskCardProps {
   task: Partial<Task>
