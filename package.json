@@ -8,8 +8,9 @@
     "lint:fix": "eslint . --ext .ts,.tsx --cache --fix",
     "lint:watch": "eslint . --ext .ts,.tsx --cache --watch",
     "lint": "next lint",
-    "build": "npm run lint && next build --turbopack",
-    "typecheck": "tsc --noEmit"
+    "build": "npm run lint && npm run typecheck && next build --turbopack",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
