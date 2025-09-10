@@ -16,7 +16,7 @@ export default async function TeamLayout({ children, params }: { children: React
   })
   if (!team) notFound()
 
-  const isMember = team.users.some((m) => m.userId === session.id)
+  const isMember = team.users.some((m: { userId: string }) => m.userId === session.id)
   if (!isMember) redirect('/select-team')
 
   return (
