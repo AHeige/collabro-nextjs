@@ -1,8 +1,12 @@
 import { prisma } from '@/lib/prisma'
 import { NextRequest } from 'next/server'
 
-export async function requireAuth(req: NextRequest) {
-  const user = (req as any).user // beroende på hur du kopplar in auth
+interface AuthenticatedRequest extends NextRequest {
+  user?: unknown
+}
+
+export async function requireAuth(req: AuthenticatedRequest) {
+  const { user } = req // beroende på hur du kopplar in auth
   if (!user) {
     return { error: 'Unauthorized', status: 401 }
   }

@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DateCell } from './datacell'
-import { EditableCell } from './editablecell'
 import { SortableHeader } from './sortableheader'
 import { StatusCell } from './statuscell'
 import { TitleHeader } from './titleheader'

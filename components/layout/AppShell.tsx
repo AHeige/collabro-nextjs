@@ -1,7 +1,7 @@
 // components/layout/AppShell.tsx
 'use client'
 
-import { Calendar, Folder, Home, Settings, Users } from 'lucide-react'
+import { Home } from 'lucide-react'
 import Link from 'next/link'
 import {
   Sidebar,

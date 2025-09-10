@@ -1,11 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import Link from 'next/link'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { toast } from 'sonner'
-import { CheckCircle2, Mail, Copy, ExternalLink, Sparkles } from 'lucide-react'
+import { CheckCircle2, Sparkles } from 'lucide-react'
 
 interface Props {
   name: string
@@ -13,41 +11,6 @@ interface Props {
 }
 
 export default function Registered({ name, email }: Props) {
-  const [resending, setResending] = useState(false)
-
-  const copyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(email)
-      toast.success('Email copied')
-    } catch {
-      toast.error('Could not copy email')
-    }
-  }
-
-  const openMail = () => {
-    window.location.href = `mailto:${email}`
-  }
-
-  const resend = async () => {
-    try {
-      setResending(true)
-      const res = await fetch('/api/auth/resend-verification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Resend failed')
-      }
-      toast.success('Verification email sent again')
-    } catch (e: any) {
-      toast.error(e.message ?? 'Resend failed')
-    } finally {
-      setResending(false)
-    }
-  }
-
   return (
     <div className='flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/40 px-4'>
       <Card className='w-full max-w-md overflow-hidden border-border/60 shadow-lg'>
@@ -59,7 +22,7 @@ export default function Registered({ name, email }: Props) {
           </div>
           <h1 className='text-xl font-semibold tracking-tight'>Välkommen {name}</h1>
           <h2 className='text-xl font-semibold tracking-tight'>Kontot har skapats!</h2>
-          <p className='text-sm text-muted-foreground text-center'>Vi har skickat ett verifikationsmail. Bekräfta din e-post för att börja använda Collabro.</p>
+          <p className='text-sm text-muted-foreground text-center'>Vi har skickat ett verifikationsmail till <span className='font-medium'>{email}</span>. Bekräfta din e-post för att börja använda Collabro.</p>
         </div>
 
         <Separator />
@@ -96,9 +59,9 @@ export default function Registered({ name, email }: Props) {
             <Sparkles className='h-3.5 w-3.5' />
             Tips: Kolla även skräppost om mailet inte syns.
           </div>
-          <a href='/auth' className='underline hover:text-foreground'>
+          <Link href='/auth' className='underline hover:text-foreground'>
             Till inloggningen
-          </a>
+          </Link>
         </div>
       </Card>
     </div>

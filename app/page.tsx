@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,7 +13,6 @@ import { toast } from 'sonner'
 // import { Donation } from '@/components/Donation'
 
 const Landing = () => {
-  const router = useRouter()
   // const { signInAnonymously } = useAuth()
 
   // const handleTryNow = async () => {

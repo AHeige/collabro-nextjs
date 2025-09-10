@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   }
 
   // transaction: user + verification token + default team
-  const [user] = await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     const createdUser = await tx.user.create({
       data: {
         email: normalizedEmail,
@@ -74,7 +74,6 @@ export async function POST(req: Request) {
       },
     })
 
-    return [createdUser]
   })
 
   // send mail
