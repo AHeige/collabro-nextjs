@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
-import { mailjet } from '@/lib/mailjet/mailjet'
+import { getMailjet } from '@/lib/mailjet/mailjet'
 
 export async function POST(req: Request) {
+  const mailjet = getMailjet()
   const { email, password, name } = await req.json()
 
   if (!email || !password) {
@@ -73,7 +74,6 @@ export async function POST(req: Request) {
         },
       },
     })
-
   })
 
   // send mail
