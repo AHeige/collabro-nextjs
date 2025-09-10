@@ -35,7 +35,9 @@ export default function SignOutPage() {
         try {
           localStorage.removeItem('collabro:ui')
           sessionStorage.clear()
-        } catch {}
+        } catch (e) {
+          console.error(e)
+        }
 
         setStatus('success')
         setMessage('Signed out successfully.')
