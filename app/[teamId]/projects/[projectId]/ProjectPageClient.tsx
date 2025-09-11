@@ -1,6 +1,8 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Task } from '@prisma/client'
+import { useSWRConfig } from 'swr'
+import useSWR from 'swr'
 import {
   ColumnFiltersState,
   SortingState,
@@ -11,7 +13,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { DataTable } from '@/components/ui/datatable'
-
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Loader2, Settings2, Plus } from 'lucide-react'
@@ -19,37 +20,21 @@ import { columnconfig } from '../config/tableconfigs/columnconfig'
 import { toast } from 'sonner'
 
 type Lite = { id: string; name: string }
-export default function ProjectPageClient({ initialTasks, team, project }: { initialTasks: Partial<Task>[]; team: Lite; project: Lite }) {
-  const [data, setData] = useState<Partial<Task>[]>(initialTasks)
-  const [isRefreshing, setIsRefreshing] = useState(false)
+
+export default function ProjectPageClient({ teamName, project }: { teamName: string; project: Lite }) {
+  const { mutate } = useSWRConfig()
+
+  // Läs tasks ur SWR-cache (fallback satt i layout.tsx)
+  const { data: tasks, isLoading } = useSWR<Partial<Task>[]>(`/api/projects/${project.id}/tasks`)
+
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
 
-  // Valfri “tyst” revalidering i bakgrunden (utan att blocka första render)
-  useEffect(() => {
-    let alive = true
-    ;(async () => {
-      try {
-        setIsRefreshing(true)
-        const res = await fetch(`/api/projects/${project.id}/tasks`, { credentials: 'include', cache: 'no-store' })
-        const json = await res.json().catch(() => ({}))
-        if (!alive) return
-        if (res.ok && Array.isArray(json.tasks)) setData(json.tasks)
-      } finally {
-        if (alive) setIsRefreshing(false)
-      }
-    })()
-    return () => {
-      alive = false
-    }
-  }, [project.id])
-
-  // Memoisera kolumnkonfig så tabellen inte re-renderar i onödan
   const columns = useMemo(() => columnconfig, [])
 
   const table = useReactTable<Partial<Task>>({
-    data,
+    data: tasks ?? [],
     columns,
     state: { sorting, columnFilters, globalFilter },
     onSortingChange: setSorting,
@@ -60,34 +45,46 @@ export default function ProjectPageClient({ initialTasks, team, project }: { ini
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     meta: {
-      updateData: (rowIndex, columnId, value) => {
-        setData((old) => old.map((row, idx) => (idx === rowIndex ? { ...row, [columnId]: value } : row)))
-        // TODO: background PATCH (optimistisk uppd.)
+      updateData: async (rowIndex, columnId, value) => {
+        const key = `/api/projects/${project.id}/tasks`
+        mutate(key, (old: any) => old.map((row: any, idx: number) => (idx === rowIndex ? { ...row, [columnId]: value } : row)), { revalidate: false })
+
+        try {
+          await fetch(`/api/projects/${project.id}/tasks/${tasks?.[rowIndex].id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [columnId]: value }),
+          })
+          mutate(key) // revalidate
+        } catch {
+          toast.error('Update failed, reverting…')
+          mutate(key) // revert från servern
+        }
       },
       addRow: async ({ title }: { title: string }) => {
-        // Optimistisk add
+        const key = `/api/projects/${project.id}/tasks`
         const tempId = `tmp_${crypto.randomUUID()}`
-        const optimistic: Partial<Task> = { id: tempId, title, statusId: 'Todo' as any, startDate: null, endDate: null, projectId: project.id }
-        setData((old) => [...old, optimistic])
+        const optimistic: Partial<Task> = {
+          id: tempId,
+          title,
+          statusId: 'Todo' as any,
+          projectId: project.id,
+        }
+
+        mutate(key, (old: any) => [...(old ?? []), optimistic], { revalidate: false })
 
         try {
           const res = await fetch(`/api/projects/${project.id}/tasks`, {
             method: 'POST',
-            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title }),
           })
-          if (!res.ok) {
-            toast.error(`Could not save task "${title}", reverting...`)
-            throw new Error()
-          }
+          if (!res.ok) throw new Error()
           const { task } = await res.json()
-          // toast.success(`Added new task "${title}"`)
-          setData((old) => old.map((t) => (t.id === tempId ? task : t)))
+          mutate(key, (old: any) => old.map((t: any) => (t.id === tempId ? task : t)))
         } catch {
-          toast.error(`Could not save task "${title}", reverting...`)
-          // Rollback
-          setData((old) => old.filter((t) => t.id !== tempId))
+          toast.error(`Could not save task "${title}", reverting…`)
+          mutate(key) // revert
         }
       },
     },
@@ -99,12 +96,12 @@ export default function ProjectPageClient({ initialTasks, team, project }: { ini
       <div className='flex items-center justify-between border-b bg-background px-4 py-2'>
         <div>
           <div className='text-xs text-muted-foreground'>
-            {team.name} / <span className='text-foreground'>{project.name}</span>
+            {teamName} / <span className='text-foreground'>{project.name}</span>
           </div>
           <h1 className='text-lg font-semibold'>{project.name}</h1>
         </div>
         <div className='flex gap-2 items-center'>
-          {isRefreshing && <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />}
+          {isLoading && <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant='outline' size='sm' className='gap-2'>
@@ -118,7 +115,6 @@ export default function ProjectPageClient({ initialTasks, team, project }: { ini
                   className='capitalize'
                   checked={column.getIsVisible()}
                   onCheckedChange={(val) => column.toggleVisibility(!!val)}
-                  style={{ cursor: 'pointer' }}
                 >
                   {column.id}
                 </DropdownMenuCheckboxItem>

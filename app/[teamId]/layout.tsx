@@ -1,8 +1,9 @@
-// app/[id]/layout.tsx
+// app/[teamId]/layout.tsx
 import { redirect, notFound } from 'next/navigation'
 import AppShell from '@/components/layout/AppShell'
 import { prisma } from '@/lib/prisma'
 import { getAuthUserLite } from '@/lib/auth-server'
+import { SWRConfig } from 'swr'
 
 export default async function TeamLayout({ children, params }: { children: React.ReactNode; params: Promise<{ teamId: string }> }) {
   const { teamId } = await params
@@ -12,7 +13,12 @@ export default async function TeamLayout({ children, params }: { children: React
 
   const team = await prisma.team.findUnique({
     where: { id: teamId },
-    select: { id: true, name: true, users: { select: { userId: true } } },
+    select: {
+      id: true,
+      name: true,
+      users: { select: { userId: true } },
+      projects: { select: { id: true, name: true, color: true } },
+    },
   })
   if (!team) notFound()
 
@@ -20,8 +26,17 @@ export default async function TeamLayout({ children, params }: { children: React
   if (!isMember) redirect('/select-team')
 
   return (
-    <AppShell teamId={team.id} teamName={team.name}>
-      {children}
-    </AppShell>
+    <SWRConfig
+      value={{
+        fallback: {
+          [`/api/teams/${team.id}`]: team,
+          [`/api/teams/${team.id}/projects`]: team.projects,
+        },
+      }}
+    >
+      <AppShell teamId={team.id} teamName={team.name}>
+        {children}
+      </AppShell>
+    </SWRConfig>
   )
 }

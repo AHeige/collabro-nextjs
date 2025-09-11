@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { mailjet } from '@/lib/mailjet/mailjet'
+import { getBaseUrl } from '@/lib/base-url'
 
 export async function POST(req: Request) {
   const { email, password, name } = await req.json()
@@ -78,7 +79,8 @@ export async function POST(req: Request) {
   })
 
   // send mail
-  const verifyUrl = `${process.env.APP_URL}/verify-email?token=${rawToken}`
+  const baseUrl = getBaseUrl()
+  const verifyUrl = `${baseUrl}/verify-email?token=${rawToken}`
 
   await mailjet.post('send', { version: 'v3.1' }).request({
     Messages: [

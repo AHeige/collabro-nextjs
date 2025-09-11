@@ -1,31 +1,15 @@
-import { prisma } from '@/lib/prisma'
-import { notFound } from 'next/navigation'
-import { unstable_noStore as noStore } from 'next/cache'
-import { getAuthUserLite } from '@/lib/auth-server'
+'use client'
+import useSWR from 'swr'
 import ProjectPageClient from './ProjectPageClient'
+import { useParams } from 'next/navigation'
 
-export default async function Page({ params }: { params: Promise<{ teamId: string; projectId: string }> }) {
-  noStore()
-  const user = await getAuthUserLite()
-  if (!user) notFound() // eller redirect('/auth')
+export default function ProjectPage() {
+  const params = useParams<{ teamId: string; projectId: string }>()
 
-  const { teamId, projectId } = await params
+  const { data: project } = useSWR(`/api/projects/${params.projectId}`)
+  const { data: tasks } = useSWR(`/api/projects/${params.projectId}/tasks`)
 
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
-    select: {
-      id: true,
-      name: true,
-      team: { select: { id: true, name: true } },
-      tasks: {
-        select: { id: true, title: true, statusId: true, startDate: true, endDate: true, createdAt: true, updatedAt: true },
-        orderBy: { createdAt: 'desc' },
-      },
-    },
-  })
-  if (!project) notFound()
+  if (!project || !tasks) return <div>Loading...</div>
 
-  return (
-    <ProjectPageClient initialTasks={project.tasks} team={{ id: project.team.id, name: project.team.name }} project={{ id: project.id, name: project.name }} />
-  )
+  return <ProjectPageClient teamName={project.name} project={{ id: project.id, name: project.name }} />
 }

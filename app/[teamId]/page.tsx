@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Plus, ChevronRight, Users, FolderKanban, Activity, TrendingUp, Clock, RefreshCcw } from 'lucide-react'
 import { toast } from 'sonner'
+import useSWR from 'swr'
 
 /**
  * Collabro — Team Dashboard page
@@ -208,39 +209,11 @@ export default function TeamDashboardPage() {
   const params = useParams<{ teamId: string }>()
   const router = useRouter()
 
-  const [team, setTeam] = useState<TeamWithExtras | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    let mounted = true
-    async function fetchTeam() {
-      try {
-        setLoading(true)
-        setError(null)
-        const res = await fetch(`/api/teams/${params.teamId}`, { credentials: 'include' })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const json = (await res.json()) as TeamWithExtras
-        if (!mounted) return
-        setTeam(json)
-      } catch (e: any) {
-        console.warn('Using mocked team due to fetch error:', e?.message)
-        if (!mounted) return
-        // — Fallback to mock so you can iterate on UI immediately
-        setTeam(mockTeam)
-        setError('Displaying mocked data (API unavailable).')
-      } finally {
-        mounted = false
-        setLoading(false)
-      }
-    }
-    fetchTeam()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.teamId])
+  const { data: team, error, isLoading } = useSWR<TeamWithExtras>(`/api/teams/${params.teamId}`)
 
   const initials = useMemo(() => getInitials(team?.name || 'Team'), [team?.name])
 
-  if (loading) return <LoadingState />
+  if (isLoading) return <LoadingState />
 
   if (!team) {
     return (
