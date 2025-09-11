@@ -1,5 +1,5 @@
 // lib/auth.ts (klient-säker – inga server imports här)
-import type { UserLite } from '@/types/auth'
+import { UserLite } from '@/types/auth'
 import type { Entity } from '@prisma/client'
 
 export function hasPermission(
@@ -10,5 +10,5 @@ export function hasPermission(
   if (!user) return false
   const teamPerms = (user.teamMember ?? []).flatMap((tm) => tm.role?.permissions ?? [])
   const projPerms = (user.projectMember ?? []).flatMap((pm) => pm.role?.permissions ?? [])
-  return [...teamPerms, ...projPerms].some((p) => p.entity === entity && (p as any)[action] === true)
+  return [...teamPerms, ...projPerms].some((p) => p.entity === entity && p[action] === true)
 }

@@ -47,7 +47,9 @@ export default function ProjectPageClient({ teamName, project }: { teamName: str
     meta: {
       updateData: async (rowIndex, columnId, value) => {
         const key = `/api/projects/${project.id}/tasks`
-        mutate(key, (old: any) => old.map((row: any, idx: number) => (idx === rowIndex ? { ...row, [columnId]: value } : row)), { revalidate: false })
+        mutate(key, (old: Partial<Task>[] | undefined) => (old ?? []).map((row, idx) => (idx === rowIndex ? { ...row, [columnId]: value } : row)), {
+          revalidate: false,
+        })
 
         try {
           await fetch(`/api/projects/${project.id}/tasks/${tasks?.[rowIndex].id}`, {
@@ -67,11 +69,11 @@ export default function ProjectPageClient({ teamName, project }: { teamName: str
         const optimistic: Partial<Task> = {
           id: tempId,
           title,
-          statusId: 'Todo' as any,
+          statusId: 'Todo' as string,
           projectId: project.id,
         }
 
-        mutate(key, (old: any) => [...(old ?? []), optimistic], { revalidate: false })
+        mutate(key, (old: Partial<Task>[] | undefined) => [...(old ?? []), optimistic], { revalidate: false })
 
         try {
           const res = await fetch(`/api/projects/${project.id}/tasks`, {
@@ -81,7 +83,7 @@ export default function ProjectPageClient({ teamName, project }: { teamName: str
           })
           if (!res.ok) throw new Error()
           const { task } = await res.json()
-          mutate(key, (old: any) => old.map((t: any) => (t.id === tempId ? task : t)))
+          mutate(key, (old: Partial<Task>[] | undefined) => (old ?? []).map((t) => (t.id === tempId ? task : t)))
         } catch {
           toast.error(`Could not save task "${title}", reverting…`)
           mutate(key) // revert

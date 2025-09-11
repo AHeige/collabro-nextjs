@@ -1,13 +1,12 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-import { Task } from '@prisma/client'
+import type { Task } from '@prisma/client'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DateCell } from './datacell'
-import { EditableCell } from './editablecell'
 import { SortableHeader } from './sortableheader'
 import { StatusCell } from './statuscell'
 import { TitleHeader } from './titleheader'

@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint . --ext .ts,.tsx --cache",
     "lint:fix": "eslint . --ext .ts,.tsx --cache --fix",
-    "lint:watch": "eslint . --ext .ts,.tsx --cache --watch"
+    "lint:watch": "eslint . --ext .ts,.tsx --cache --watch",
+    "lint": "next lint",
+    "build": "npm run lint && npm run typecheck && next build --turbopack",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -43,7 +45,8 @@
     "sonner": "^2.0.7",
     "swr": "^2.3.6",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "prisma": "^6.15.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.12",
@@ -57,7 +60,6 @@
     "eslint-config-next": "^15.5.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-unused-imports": "^4.2.0",
-    "prisma": "^6.15.0",
     "tailwindcss": "^4.1.12",
     "ts-node": "^10.9.2",
     "tw-animate-css": "^1.3.7",

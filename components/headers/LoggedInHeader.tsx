@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { User } from '@prisma/client'
 import { HeaderUser } from '@/types/auth'
 
 export function LoggedInHeader({ user }: { user: HeaderUser }) {

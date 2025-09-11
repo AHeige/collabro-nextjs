@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import type { Team, Project } from '@prisma/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Plus, ChevronRight, Users, FolderKanban, Activity, TrendingUp, Clock, RefreshCcw } from 'lucide-react'
 import { toast } from 'sonner'
@@ -82,7 +81,7 @@ const mockTeam: TeamWithExtras = {
       status: 'active',
       openTasks: 18,
       progressPct: 42,
-    } as any,
+    } as ProjectWithExtras,
     {
       id: 'p2',
       teamId: 'mock-team-1',
@@ -95,7 +94,7 @@ const mockTeam: TeamWithExtras = {
       status: 'paused',
       openTasks: 6,
       progressPct: 23,
-    } as any,
+    } as ProjectWithExtras,
     {
       id: 'p3',
       teamId: 'mock-team-1',
@@ -108,7 +107,7 @@ const mockTeam: TeamWithExtras = {
       status: 'active',
       openTasks: 12,
       progressPct: 10,
-    } as any,
+    } as ProjectWithExtras,
   ],
   stats: {
     activeProjects: 2,
