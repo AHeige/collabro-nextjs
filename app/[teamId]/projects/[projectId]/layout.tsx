@@ -11,12 +11,28 @@ export default async function ProjectLayout({ children, params }: { children: Re
     include: {
       team: { select: { id: true, name: true } },
       tasks: {
-        select: { id: true, title: true, statusId: true, startDate: true, endDate: true, createdAt: true, updatedAt: true },
+        select: {
+          id: true,
+          title: true,
+          statusId: true,
+          startDate: true,
+          endDate: true,
+          dueDate: true,
+          createdAt: true,
+          updatedAt: true,
+          status: true,
+          priority: true,
+        },
         orderBy: { createdAt: 'desc' },
       },
       milestones: true,
+      statuses: {
+        select: { id: true, name: true },
+      },
     },
   })
+
+  console.log('Statuses for project', project)
 
   if (!project) notFound()
 
@@ -27,6 +43,7 @@ export default async function ProjectLayout({ children, params }: { children: Re
           [`/api/projects/${project.id}`]: project,
           [`/api/projects/${project.id}/tasks`]: project.tasks,
           [`/api/projects/${project.id}/milestones`]: project.milestones,
+          [`/api/projects/${project.id}/statuses`]: project.statuses,
         },
       }}
     >

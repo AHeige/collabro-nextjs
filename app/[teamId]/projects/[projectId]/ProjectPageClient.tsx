@@ -1,6 +1,6 @@
 'use client'
 import { useMemo, useState } from 'react'
-import { Task } from '@prisma/client'
+import { Status, Task } from '@prisma/client'
 import { useSWRConfig } from 'swr'
 import useSWR from 'swr'
 import {
@@ -26,12 +26,15 @@ export default function ProjectPageClient({ teamName, project }: { teamName: str
 
   // Läs tasks ur SWR-cache (fallback satt i layout.tsx)
   const { data: tasks, isLoading } = useSWR<Partial<Task>[]>(`/api/projects/${project.id}/tasks`)
+  const { data: statuses } = useSWR<Pick<Status, 'id' | 'name'>[]>(`/api/projects/${project.id}/statuses`)
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
 
   const columns = useMemo(() => columnconfig, [])
+
+  const key = `/api/projects/${project.id}/tasks`
 
   const table = useReactTable<Partial<Task>>({
     data: tasks ?? [],
@@ -44,36 +47,45 @@ export default function ProjectPageClient({ teamName, project }: { teamName: str
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: { pageSize: 100 },
+    },
     meta: {
       updateData: async (rowIndex, columnId, value) => {
-        const key = `/api/projects/${project.id}/tasks`
-        mutate(key, (old: Partial<Task>[] | undefined) => (old ?? []).map((row, idx) => (idx === rowIndex ? { ...row, [columnId]: value } : row)), {
+        const targetId = tasks?.[rowIndex].id
+        if (!targetId) return
+
+        // Optimistic update
+        mutate(key, (old: Partial<Task>[] | undefined) => (old ? old.map((row, idx) => (idx === rowIndex ? { ...row, [columnId]: value } : row)) : old), {
           revalidate: false,
         })
 
         try {
-          await fetch(`/api/projects/${project.id}/tasks/${tasks?.[rowIndex].id}`, {
+          const res = await fetch(`/api/tasks/${targetId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [columnId]: value }),
           })
-          mutate(key) // revalidate
+          await mutate(key)
+          if (!res.ok) throw new Error()
         } catch {
           toast.error('Update failed, reverting…')
-          mutate(key) // revert från servern
         }
       },
-      addRow: async ({ title }: { title: string }) => {
-        const key = `/api/projects/${project.id}/tasks`
+
+      addRow: async ({ title }) => {
         const tempId = `tmp_${crypto.randomUUID()}`
         const optimistic: Partial<Task> = {
           id: tempId,
           title,
-          statusId: 'Todo' as string,
+          statusId: 'Todo', // fallback
           projectId: project.id,
         }
 
-        mutate(key, (old: Partial<Task>[] | undefined) => [...(old ?? []), optimistic], { revalidate: false })
+        // Optimistic append
+        mutate(key, (old: Partial<Task>[] | undefined) => [...(old ?? []), optimistic], {
+          revalidate: false,
+        })
 
         try {
           const res = await fetch(`/api/projects/${project.id}/tasks`, {
@@ -83,12 +95,18 @@ export default function ProjectPageClient({ teamName, project }: { teamName: str
           })
           if (!res.ok) throw new Error()
           const { task } = await res.json()
-          mutate(key, (old: Partial<Task>[] | undefined) => (old ?? []).map((t) => (t.id === tempId ? task : t)))
+
+          // Replace temp task with server task
+          mutate(key, (old: Partial<Task>[] | undefined) => (old ?? []).map((t) => (t.id === tempId ? task : t)), { revalidate: false })
         } catch {
           toast.error(`Could not save task "${title}", reverting…`)
-          mutate(key) // revert
+          await mutate(key) // rollback
+        } finally {
+          await mutate(key) // final sync
         }
       },
+      mutate,
+      statuses: statuses ?? [],
     },
   })
 

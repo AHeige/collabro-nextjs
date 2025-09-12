@@ -67,6 +67,9 @@ export async function POST(req: Request) {
           roleId: ownerRole.id,
         },
       },
+      statuses: {
+        create: [{ name: 'Todo' }, { name: 'In Progress' }, { name: 'Done' }],
+      },
     },
     include: {
       team: true,
@@ -76,6 +79,7 @@ export async function POST(req: Request) {
           role: true,
         },
       },
+      statuses: true,
     },
   })
 

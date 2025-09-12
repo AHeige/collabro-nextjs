@@ -21,7 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang='en'>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>
-        <SmartHeader initialUser={u ? { id: u.id, name: u.name, email: u.email } : null} />
+        <SmartHeader initialUser={u} />
         {children}
         <Toaster richColors />
       </body>

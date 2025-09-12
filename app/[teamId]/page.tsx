@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import type { Team, Project } from '@prisma/client'
+import type { Team, Project, Task } from '@prisma/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -36,6 +36,7 @@ type ProjectWithExtras = Project & {
   openTasks?: number
   progressPct?: number
   updatedAt?: Date | string
+  tasks: Task[]
 }
 
 export type TeamWithExtras = Team & {
@@ -283,9 +284,9 @@ export default function TeamDashboardPage() {
             <h2 className='text-lg font-medium'>Projects</h2>
             <div className='flex gap-2'>
               <Input placeholder='Filter projects…' className='h-9 w-56' />
-              <Button variant='outline' onClick={() => router.push(`/projects/new?teamId=${team.id}`)}>
+              {/* <Button variant='outline' onClick={() => router.push(`/projects/new?teamId=${team.id}`)}>
                 <Plus className='mr-2 h-4 w-4' /> New Project
-              </Button>
+              </Button> */}
             </div>
           </div>
 
@@ -442,7 +443,7 @@ function ProjectCard({ project, onOpen }: { project: ProjectWithExtras; onOpen: 
 
         <div className='flex items-center justify-between text-sm'>
           <div className='flex items-center gap-2 text-muted-foreground'>
-            <Activity className='h-4 w-4' /> {project.openTasks ?? 0} open tasks
+            <Activity className='h-4 w-4' /> {project.tasks.length ?? 0} open tasks
           </div>
           <Button size='sm' variant='ghost' onClick={onOpen}>
             Open <ChevronRight className='ml-1 h-4 w-4' />

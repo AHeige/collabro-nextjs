@@ -1,76 +1,59 @@
-'use client'
-
 import { ColumnDef } from '@tanstack/react-table'
-import type { Task } from '@prisma/client'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
+import { Task, Priority } from '@prisma/client'
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DateCell } from './datacell'
-import { SortableHeader } from './sortableheader'
-import { StatusCell } from './statuscell'
-import { TitleHeader } from './titleheader'
+import { Button } from '@/components/ui/button'
+import { Trash2 } from 'lucide-react'
+import { TitleCell, StatusCell, PriorityCell, DateCell } from './cells'
+
+function TitleHeader({ title }: { title: string }) {
+  return <span className='font-semibold'>{title}</span>
+}
 
 export const columnconfig: ColumnDef<Partial<Task>>[] = [
   {
-    id: 'select',
-    header: ({ table }) => (
-      <Checkbox checked={table.getIsAllPageRowsSelected()} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label='Select all' />
-    ),
-    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Select row' />,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'title',
-    header: ({ column }) => <TitleHeader column={column} />,
-    cell: ({ getValue }) => <span>{getValue() as string}</span>,
+    header: () => <TitleHeader title='Title' />,
+    cell: (ctx) => <TitleCell {...ctx} initialValue={(ctx.getValue() as unknown as string) ?? ''} />,
   },
   {
     accessorKey: 'statusId',
-    header: ({ column }) => (
-      <div className='flex items-center gap-2'>
-        <SortableHeader column={column} label='Status' />
-        <Select value={(column.getFilterValue() as string) ?? 'all'} onValueChange={(val) => column.setFilterValue(val === 'all' ? undefined : val)}>
-          <SelectTrigger className='h-8 w-[120px]'>
-            <SelectValue placeholder='All' />
-          </SelectTrigger>
-          <SelectContent className='bg-background'>
-            <SelectItem value='all'>All</SelectItem>
-            <SelectItem value='Todo'>Todo</SelectItem>
-            <SelectItem value='In Progress'>In Progress</SelectItem>
-            <SelectItem value='Done'>Done</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    ),
-    cell: StatusCell,
-    filterFn: 'equals',
+    header: () => <TitleHeader title='Status' />,
+    cell: (ctx) => <StatusCell {...ctx} value={ctx.getValue() as unknown as string | null} statuses={ctx.table.options.meta?.statuses ?? []} />,
+  },
+  {
+    accessorKey: 'priority',
+    header: () => <TitleHeader title='Priority' />,
+    cell: (ctx) => <PriorityCell {...ctx} value={(ctx.getValue() as unknown as Priority) ?? 'MEDIUM'} />,
   },
   {
     accessorKey: 'startDate',
-    header: ({ column }) => <SortableHeader column={column} label='Start Date' />,
-    cell: DateCell,
+    header: () => <TitleHeader title='Start Date' />,
+    cell: (ctx) => <DateCell {...ctx} value={ctx.getValue() as unknown as string | null} />,
   },
   {
-    accessorKey: 'endDate',
-    header: ({ column }) => <SortableHeader column={column} label='End Date' />,
-    cell: DateCell,
+    accessorKey: 'dueDate',
+    header: () => <TitleHeader title='Due Date' />,
+    cell: (ctx) => <DateCell {...ctx} value={ctx.getValue() as unknown as string | null} />,
   },
   {
     id: 'actions',
-    header: 'Actions',
-    cell: ({ row }) => {
+    header: () => <span>Actions</span>,
+    cell: ({ row, table }) => {
       const task = row.original
       return (
-        <div className='flex gap-2'>
-          <Button variant='outline' size='sm' onClick={() => alert(`Edit ${task.title}`)}>
-            Edit
-          </Button>
-          <Button variant='destructive' size='sm' onClick={() => alert(`Delete ${task.title}`)}>
-            Delete
-          </Button>
-        </div>
+        <Button
+          variant='destructive'
+          size='sm'
+          onClick={async () => {
+            if (!task.id) return
+            const key = `/api/projects/${task.projectId}/tasks`
+            table.options.meta?.mutate(key, (old) => (old ?? []).filter((t) => t.id !== task.id), { revalidate: false })
+            await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' })
+            await table.options.meta?.mutate(key)
+          }}
+        >
+          <Trash2 className='h-4 w-4' />
+        </Button>
       )
     },
   },

@@ -17,7 +17,7 @@ export default async function TeamLayout({ children, params }: { children: React
       id: true,
       name: true,
       users: { select: { userId: true } },
-      projects: { select: { id: true, name: true, color: true } },
+      projects: { select: { id: true, name: true, color: true, tasks: true, owner: true } },
     },
   })
   if (!team) notFound()

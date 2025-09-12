@@ -1,12 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+// import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { HeaderUser } from '@/types/auth'
+import { UserLite } from '@/types/auth'
 
-export function LoggedInHeader({ user }: { user: HeaderUser }) {
+export function LoggedInHeader({ user }: { user: UserLite }) {
   const initials = (user.name || user.email || 'U')
     .split(' ')
     .map((s) => s[0])
@@ -38,9 +38,9 @@ export function LoggedInHeader({ user }: { user: HeaderUser }) {
         </div>
 
         <div className='flex items-center gap-2'>
-          <Button asChild variant='outline' className='hidden sm:inline-flex'>
+          {/* <Button asChild variant='outline' className='hidden sm:inline-flex'>
             <Link href='/projects/new'>New Project</Link>
-          </Button>
+          </Button> */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className='h-8 w-8 cursor-pointer'>

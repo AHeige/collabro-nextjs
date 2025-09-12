@@ -12,13 +12,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   }
 
   const { id } = await params
-
   if (!id) {
-    return NextResponse.json({ error: 'Missing ID from project' }, { status: 401 })
+    return NextResponse.json({ error: 'Missing ID from project' }, { status: 400 })
   }
 
   const project = await prisma.project.findUnique({
-    where: { id: id },
+    where: { id },
     select: {
       id: true,
       name: true,
@@ -28,9 +27,24 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         select: {
           id: true,
           title: true,
+          description: true,
           statusId: true,
+          status: { select: { id: true, name: true, color: true } },
+          assigneeId: true,
+          assignee: { select: { id: true, name: true, email: true } },
+          milestoneId: true,
+          milestone: { select: { id: true, name: true } },
+          categoryId: true,
+          category: { select: { id: true, name: true } },
+          priority: true,
+          progress: true,
+          tags: true,
+          color: true,
           startDate: true,
           endDate: true,
+          dueDate: true,
+          parentTaskId: true,
+          createdBy: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -39,6 +53,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   })
 
   if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  console.log(project)
 
   return NextResponse.json(
     {
@@ -121,6 +137,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       statusId: true,
       startDate: true,
       endDate: true,
+      dueDate: true,
       projectId: true,
       createdAt: true,
       updatedAt: true,
